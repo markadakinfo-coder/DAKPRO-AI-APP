@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html class="dark" lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0f131c" />
+<title>DachPro AI / ToiturePro AI — SaaS Dekarski & Peppol / KSeF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+darkMode: "class",
+theme: {
+extend: {
+colors: {
+"surface": "#0f131c",
+"surface-dim": "#0f131c",
+"surface-container-lowest": "#0a0e16",
+"surface-container-low": "#181c24",
+"surface-container": "#1c2028",
+"surface-container-high": "#262a33",
+"surface-container-highest": "#31353e",
+"surface-bright": "#353942",
+"on-surface": "#dfe2ee",
+"on-surface-variant": "#d8c3ad",
+"outline": "#a08e7a",
+"outline-variant": "#534434",
+"primary": "#ffc174",
+"primary-container": "#f59e0b",
+"on-primary": "#472a00",
+"on-primary-container": "#613b00",
+"primary-fixed": "#ffddb8",
+"primary-fixed-dim": "#ffb95f",
+"secondary": "#4cd7f6",
+"secondary-container": "#03b5d3",
+"on-secondary": "#003640",
+"on-secondary-container": "#00424e",
+"tertiary": "#56e5a9",
+"tertiary-container": "#30c88f",
+"on-tertiary": "#003824",
+"on-tertiary-container": "#004e34",
+"error": "#ffb4ab",
+"error-container": "#93000a",
+"on-error": "#690005",
+"on-error-container": "#ffdad6"
+},
+fontFamily: {
+"headline": ["Space Grotesk", "sans-serif"],
+"body": ["Hanken Grotesk", "sans-serif"],
+"mono": ["JetBrains Mono", "monospace"]
+}
+}
+}
+};
+</script>
+<style>
+@layer base {
+html, body {
+width: 100%;
+margin: 0;
+padding: 0;
+background-color: #0f131c;
+color: #dfe2ee;
+overscroll-behavior: none;
+-webkit-tap-highlight-color: transparent;
+}
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+}
+::-webkit-scrollbar { display: none; }
+.tab-view { display: none; }
+.tab-view.active { display: flex; animation: fadeIn 0.18s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body class="bg-surface font-body text-on-surface flex flex-col min-h-screen antialiased selection:bg-primary-container selection:text-on-primary">
+
+<!-- GLOBAL TOP APP BAR -->
+<header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl border-b border-outline-variant/25 shadow-[0_2px_12px_rgba(0,0,0,0.45)]">
+<div class="max-w-2xl mx-auto h-16 px-4 flex items-center justify-between gap-2">
+<!-- Brand -->
+<div class="flex items-center gap-2.5 min-w-0 cursor-pointer" onclick="switchTab('dashboard')">
+<div class="w-9 h-9 rounded-lg bg-primary-container/20 border border-primary-container/40 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[22px]">roofing</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1">
+<span id="brand-name" class="font-headline font-bold text-[18px] tracking-tight text-on-surface leading-none">DachPro</span>
+<span class="font-headline font-bold text-[18px] tracking-tight text-primary-container leading-none">AI</span>
+</div>
+<span id="header-subtitle" class="font-headline font-bold text-[10px] uppercase tracking-wider text-on-surface-variant truncate mt-0.5">Pulpit Operacyjny</span>
+</div>
+</div>
+
+<!-- Right Controls: Fiscal Status + Region Switcher -->
+<div class="flex items-center gap-2 shrink-0">
+<div id="fiscal-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary/15 text-tertiary border border-tertiary/25">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span id="fiscal-badge-text" class="font-mono text-[11px] font-semibold uppercase">KSeF / PEPPOL</span>
+</div>
+
+<!-- Region / Jurisdiction Selector -->
+<div class="relative">
+<select id="region-selector" onchange="setRegion(this.value)" aria-label="Region i Język"
+class="appearance-none bg-surface-container-high hover:bg-surface-bright text-on-surface font-mono text-xs font-bold pl-2.5 pr-7 py-2 rounded-lg border border-outline-variant/40 cursor-pointer focus:outline-none focus:border-primary">
+<option value="PL">🇵🇱 PL (KSeF)</option>
+<option value="BE">🇧🇪 BE (Peppol)</option>
+<option value="NL">🇳🇱 NL (Peppol)</option>
+<option value="DE">🇩🇪 DE (XRech.)</option>
+</select>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
+</div>
+
+<button onclick="showToast('Profil: Marka Construct BV / DachPro Master v4.4')" class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline font-bold text-sm shrink-0 shadow">
+MC
+</button>
+</div>
+</div>
+</header>
+
+<!-- MAIN CONTAINER -->
+<main class="flex-1 w-full max-w-2xl mx-auto px-4 pt-20 pb-28">
+
+<!-- ===================================================================== -->
+<!-- TAB 1: DASHBOARD (PULPIT) -->
+<!-- ===================================================================== -->
+<section id="tab-dashboard" class="tab-view active flex-col gap-4">
+<div class="bg-surface-container-low p-3 rounded-xl flex items-center justify-between border border-outline-variant/20">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-tertiary/15 text-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline text-[10px] uppercase tracking-wider text-on-surface-variant">Bramka Fiskalna & AS4</span>
+<span id="dash-fiscal-line" class="text-xs text-tertiary font-semibold truncate">KSeF 2.0 FA(3) & Peppol BIS 3.0: Zsynchronizowany</span>
+</div>
+</div>
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-tertiary/20 text-tertiary font-bold shrink-0">ONLINE</span>
+</div>
+
+<div class="bg-surface-container p-4 rounded-xl flex items-center justify-between shadow-md">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-12 h-12 rounded-xl bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[28px]">air</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline font-bold text-xl text-on-surface">19°C</span>
+<span class="font-mono text-xs text-secondary bg-surface-container-highest px-2 py-0.5 rounded">Wiatr: 14 km/h</span>
+</div>
+<span class="text-xs text-tertiary flex items-center gap-1 mt-1 font-medium truncate">
+<span class="material-symbols-outlined text-[15px]">check_circle</span>
+<span>Bez opadów do 18:00 • Warunki bezpieczne</span>
+</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-headline text-[10px] uppercase text-on-surface-variant">Okno prac</span>
+<span class="font-mono text-base text-primary font-bold">6h 40m</span>
+</div>
+</div>
+
+<div class="grid grid-cols-2 gap-3">
+<div class="col-span-2 bg-surface-container p-4 rounded-xl shadow-md">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary">roofing</span>
+<span class="font-headline text-[11px] uppercase tracking-wider font-bold">Aktywne Realizacje</span>
+</div>
+<span class="font-mono text-lg text-primary font-bold">4 dachy</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div onclick="switchTab('plans')" class="bg-surface-container-high hover:bg-surface-bright cursor-pointer p-2.5 rounded-lg transition-colors">
+<span class="text-xs font-bold text-on-surface block truncate">Residentie Kampinos / Namur</span>
+<span class="font-mono text-[11px] text-secondary">312.4 m² • 38° • Wielospadowy</span>
+</div>
+<div onclick="switchTab('finance')" class="bg-surface-container-high hover:bg-surface-bright cursor-pointer p-2.5 rounded-lg transition-colors">
+<span class="text-xs font-bold text-on-surface block truncate">Oberursel / Utrecht BIPV</span>
+<span class="font-mono text-[11px] text-tertiary">248.5 m² • PV 14.2 kWp</span>
+</div>
+</div>
+</div>
+
+<div onclick="switchTab('finance')" class="bg-surface-container p-3.5 rounded-xl shadow-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-headline text-[10px] uppercase text-on-surface-variant font-bold">Oczekuje Peppol / KSeF</span>
+<span class="material-symbols-outlined text-[18px] text-tertiary">payments</span>
+</div>
+<div class="font-mono text-base font-bold text-on-surface mt-1.5">142.800,00 €</div>
+<div class="text-[11px] text-tertiary mt-0.5">2 faktury zatwierdzone</div>
+</div>
+
+<div onclick="switchTab('inspect')" class="bg-surface-container p-3.5 rounded-xl shadow-md cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-headline text-[10px] uppercase text-on-surface-variant font-bold">Usterki AI (NIT 240)</span>
+<span class="material-symbols-outlined text-[18px] text-error">warning</span>
+</div>
+<div class="font-mono text-base font-bold text-error mt-1.5">2 krytyczne</div>
+<div class="text-[11px] text-on-surface-variant mt-0.5 truncate">Komin C-02 • Wakaflex</div>
+</div>
+</div>
+
+<!-- Quick Actions -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between px-1">
+<span class="font-headline text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Szybkie Akcje Terenowe</span>
+<span class="font-mono text-[11px] text-primary">Tryb Rękawic Aktywny</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<button onclick="switchTab('plans'); setPlanMode('pdf')" class="bg-primary-container text-on-primary-container p-4 rounded-xl flex flex-col justify-between h-28 shadow-lg active:scale-95 transition-transform text-left">
+<div class="flex items-center justify-between w-full">
+<span class="material-symbols-outlined text-[30px]">document_scanner</span>
+<span class="font-mono text-[10px] bg-on-primary-container/20 px-1.5 py-0.5 rounded font-bold">PDF/DWG</span>
+</div>
+<div>
+<span class="font-headline font-bold text-base block leading-tight">Import PDF / Lastenboek</span>
+<span class="text-xs opacity-90">Ekstrakcja przedmiaru AI</span>
+</div>
+</button>
+
+<button onclick="switchTab('inspect')" class="bg-surface-container-highest text-secondary p-4 rounded-xl flex flex-col justify-between h-28 shadow-md active:scale-95 transition-transform text-left">
+<div class="flex items-center justify-between w-full">
+<span class="material-symbols-outlined text-[30px]">radar</span>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+</div>
+<div>
+<span class="font-headline font-bold text-base text-on-surface block leading-tight">Inspekcja Wizyjna AI</span>
+<span class="text-xs text-on-surface-variant">CSTC NIT 240 / DIN 18338</span>
+</div>
+</button>
+
+<button onclick="switchTab('finance'); setFinanceSub('invoice')" class="bg-surface-container p-4 rounded-xl flex flex-col justify-between h-28 shadow-md active:scale-95 transition-transform text-left">
+<div class="flex items-center justify-between w-full">
+<span class="material-symbols-outlined text-[30px] text-tertiary">receipt_long</span>
+<span class="font-mono text-[10px] text-tertiary font-bold">UBL / FA(3)</span>
+</div>
+<div>
+<span class="font-headline font-bold text-base text-on-surface block leading-tight">Wystaw e-Fakturę</span>
+<span class="text-xs text-on-surface-variant">Peppol / KSeF / XRechnung</span>
+</div>
+</button>
+
+<button onclick="switchTab('finance'); setFinanceSub('abnahme')" class="bg-surface-container p-4 rounded-xl flex flex-col justify-between h-28 shadow-md active:scale-95 transition-transform text-left">
+<div class="flex items-center justify-between w-full">
+<span class="material-symbols-outlined text-[30px] text-primary">draw</span>
+<span class="font-mono text-[10px] text-primary font-bold">eIDAS</span>
+</div>
+<div>
+<span class="font-headline font-bold text-base text-on-surface block leading-tight">Protokół Odbioru</span>
+<span class="text-xs text-on-surface-variant">VOB/B § 12 • Podpis XAdES</span>
+</div>
+</button>
+</div>
+</div>
+
+<!-- Field Alert -->
+<div id="field-alert-box" class="bg-surface-container-low p-4 rounded-xl border border-error/30 shadow-md flex flex-col gap-3">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-error-container/30 text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">crisis_alert</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline text-[10px] bg-error-container text-on-error-container px-1.5 py-0.5 rounded uppercase font-bold">Odchylenie Krytyczne</span>
+<span class="font-mono text-xs text-on-surface-variant">Chantier Liège / Otwock</span>
+</div>
+<h3 class="font-bold text-base text-on-surface mt-1">Niezgodność spadku w koszu zlewnym i brak obróbki komina</h3>
+<p class="text-xs text-on-surface-variant mt-0.5">
+AI wykryło spadek <span class="text-error font-mono font-bold">12.2°</span> (wymagane <span class="text-on-surface font-mono font-bold">15.0°</span>) oraz brak taśmy Wakaflex przy kominie C-02.
+</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button onclick="switchTab('inspect')" class="flex-1 min-h-[44px] bg-error-container text-on-error-container rounded-lg font-headline text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+Otwórz Raport Usterek AI
+</button>
+<button onclick="document.getElementById('field-alert-box').style.display='none'; showToast('Alert wyciszony')" class="min-h-[44px] px-4 bg-surface-container-highest text-on-surface rounded-lg text-xs font-semibold">
+Ignoruj
+</button>
+</div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- TAB 2: AI PLANS & PDF / LASTENBOEK -->
+<!-- ===================================================================== -->
+<section id="tab-plans" class="tab-view flex-col gap-4">
+<div class="grid grid-cols-2 gap-1.5 p-1 bg-surface-container-lowest rounded-xl border border-outline-variant/25">
+<button id="btn-plan-cad" onclick="setPlanMode('cad')" class="py-2.5 px-3 rounded-lg font-headline text-xs uppercase font-bold bg-primary-container text-on-primary-container shadow">
+Rzut CAD & Wektory AI
+</button>
+<button id="btn-plan-pdf" onclick="setPlanMode('pdf')" class="py-2.5 px-3 rounded-lg font-headline text-xs uppercase font-bold text-on-surface-variant hover:text-on-surface">
+PDF Lastenboek (48 str.)
+</button>
+</div>
+
+<!-- SUBVIEW CAD -->
+<div id="plan-mode-cad" class="flex flex-col gap-4">
+<div class="bg-surface-container-low p-4 rounded-xl space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+<span class="font-headline text-[11px] uppercase tracking-wider text-secondary font-bold">AI Vision Engine v4.4 • Buildwise / CSTC</span>
+</div>
+<span class="font-mono text-xs text-tertiary bg-surface-container-highest px-2 py-0.5 rounded">99.4% Pewność</span>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<span class="text-[11px] uppercase text-on-surface-variant font-headline">Aktywny Projekt</span>
+<h2 class="font-headline font-bold text-xl text-on-surface">Residentie Kampinos / Les Ardennes</h2>
+</div>
+<span class="font-mono text-xs bg-surface-container text-primary px-2.5 py-1 rounded font-bold">A3 • 38.0°</span>
+</div>
+</div>
+
+<div class="bg-surface-container-low rounded-xl overflow-hidden shadow-lg border border-outline-variant/20">
+<div class="flex items-center justify-between px-3 py-2 bg-surface-container">
+<span class="font-headline text-[11px] uppercase tracking-wider text-on-surface font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[16px]">architecture</span>
+Detekcja Połaci, Velux i Kominów
+</span>
+<button onclick="togglePlanZoom()" class="text-xs font-mono text-primary bg-surface-container-high px-2 py-1 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">zoom_in</span>
+<span id="zoom-label">100%</span>
+</button>
+</div>
+
+<div class="relative w-full aspect-[4/3] bg-surface-container-lowest overflow-hidden flex items-center justify-center">
+<svg id="roof-svg" class="w-full h-full transition-transform duration-300" viewBox="0 0 360 270" fill="none">
+<defs>
+<pattern id="bp-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+<path d="M 20 0 L 0 0 0 20" fill="none" stroke="#262a33" stroke-width="0.6" />
+</pattern>
+</defs>
+<rect width="100%" height="100%" fill="url(#bp-grid)" />
+<polygon points="35,225 325,225 285,45 75,45" fill="#03b5d3" fill-opacity="0.08" stroke="#4cd7f6" stroke-width="2" stroke-dasharray="4 2" />
+<line x1="130" y1="100" x2="230" y2="100" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round" />
+<circle cx="130" cy="100" r="3.5" fill="#f59e0b" />
+<circle cx="230" cy="100" r="3.5" fill="#f59e0b" />
+<line x1="75" y1="45" x2="130" y2="100" stroke="#ffc174" stroke-width="2" />
+<line x1="285" y1="45" x2="230" y2="100" stroke="#ffc174" stroke-width="2" />
+<line x1="130" y1="100" x2="90" y2="225" stroke="#03b5d3" stroke-width="2.5" />
+<line x1="230" y1="100" x2="270" y2="225" stroke="#03b5d3" stroke-width="2.5" />
+<polygon points="150,150 210,150 200,225 160,225" fill="#f59e0b" fill-opacity="0.12" stroke="#f59e0b" stroke-width="1.5" />
+<rect x="95" y="75" width="22" height="30" rx="1" fill="#181c24" stroke="#4cd7f6" stroke-width="1.5" />
+<text x="96" y="70" fill="#4cd7f6" font-family="JetBrains Mono" font-size="8" font-weight="700">W-01</text>
+<rect x="245" y="75" width="22" height="30" rx="1" fill="#181c24" stroke="#4cd7f6" stroke-width="1.5" />
+<text x="246" y="70" fill="#4cd7f6" font-family="JetBrains Mono" font-size="8" font-weight="700">W-02</text>
+<rect x="170" y="68" width="20" height="26" rx="1" fill="#181c24" stroke="#4cd7f6" stroke-width="1.5" />
+<text x="171" y="63" fill="#4cd7f6" font-family="JetBrains Mono" font-size="8" font-weight="700">W-03</text>
+<rect x="248" y="38" width="18" height="14" fill="#93000a" fill-opacity="0.5" stroke="#ffb4ab" stroke-width="1.2" />
+<text x="257" y="48" fill="#ffb4ab" font-family="JetBrains Mono" font-size="7" text-anchor="middle">CH</text>
+<rect x="155" y="114" width="50" height="18" rx="2" fill="#0f131c" stroke="#ffc174" stroke-width="1" />
+<text x="180" y="126" fill="#ffc174" font-family="JetBrains Mono" font-size="9" font-weight="700" text-anchor="middle">∠ 38.0°</text>
+</svg>
+<div class="absolute bottom-2 left-2 bg-surface-container/90 backdrop-blur px-2 py-1 rounded font-mono text-[10px] text-secondary">
+3x Velux 78x140 • 1x Komin • 4 połacie
+</div>
+</div>
+</div>
+
+<div class="grid grid-cols-2 gap-2.5">
+<div class="col-span-2 bg-surface-container p-4 rounded-xl flex items-center justify-between">
+<div>
+<span class="font-headline text-[11px] uppercase text-on-surface-variant font-bold">Powierzchnia Netto Połaci</span>
+<span class="text-xs text-on-surface-variant block">Po odliczeniu 3 okien Velux i komina</span>
+</div>
+<div class="bg-surface-container-high px-3 py-1.5 rounded-lg flex items-baseline gap-1">
+<span class="font-mono text-2xl font-bold text-primary">312.4</span>
+<span class="font-mono text-xs text-on-surface-variant">m²</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-3 rounded-xl">
+<span class="font-headline text-[10px] uppercase text-on-surface-variant">Kalenica główna</span>
+<div class="font-mono text-base font-bold text-on-surface mt-1">18.50 <span class="text-xs text-on-surface-variant">mb</span></div>
+</div>
+<div class="bg-surface-container-low p-3 rounded-xl">
+<span class="font-headline text-[10px] uppercase text-on-surface-variant">Grzbiety / Naroża</span>
+<div class="font-mono text-base font-bold text-on-surface mt-1">34.20 <span class="text-xs text-on-surface-variant">mb</span></div>
+</div>
+<div class="bg-surface-container-low p-3 rounded-xl">
+<span class="font-headline text-[10px] uppercase text-on-surface-variant">Kosze zlewne (Cynk)</span>
+<div class="font-mono text-base font-bold text-secondary mt-1">14.80 <span class="text-xs text-on-surface-variant">mb</span></div>
+</div>
+<div class="bg-surface-container-low p-3 rounded-xl">
+<span class="font-headline text-[10px] uppercase text-on-surface-variant">Linia okapu / rynny</span>
+<div class="font-mono text-base font-bold text-tertiary mt-1">42.00 <span class="text-xs text-on-surface-variant">mb</span></div>
+</div>
+</div>
+
+<div class="bg-surface-container p-4 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-headline font-bold text-base text-on-surface">Specyfikacja Materiałowa (STS 34)</span>
+<span class="font-mono text-xs text-primary bg-primary/15 px-2 py-0.5 rounded font-bold">+10.4% odpad</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg space-y-1.5">
+<div class="flex justify-between items-center">
+<span class="font-semibold text-sm text-on-surface">Dachówka Koramic / Blachodachówka</span>
+<span class="font-mono text-sm font-bold text-primary">345 m²</span>
+</div>
+<div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden flex">
+<div class="bg-primary h-full" style="width: 89.6%"></div>
+<div class="bg-secondary h-full" style="width: 10.4%"></div>
+</div>
+<div class="flex justify-between font-mono text-[10px] text-on-surface-variant">
+<span>Netto: 312.4 m²</span>
+<span>Zapas kosze/naroża: +32.6 m²</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center font-mono text-xs">
+<div class="bg-surface-container-low p-2 rounded">
+<span class="text-[10px] text-on-surface-variant block">Delta-Vent S</span>
+<strong class="text-on-surface">4 rolki</strong>
+</div>
+<div class="bg-surface-container-low p-2 rounded">
+<span class="text-[10px] text-on-surface-variant block">Rheinzink 0.8</span>
+<strong class="text-secondary">44 mb</strong>
+</div>
+<div class="bg-surface-container-low p-2 rounded">
+<span class="text-[10px] text-on-surface-variant block">Wkręty Torx</span>
+<strong class="text-tertiary">2.800 szt.</strong>
+</div>
+</div>
+</div>
+
+<button onclick="switchTab('finance'); setFinanceSub('quote'); showToast('Obmiar 312.4 m² przeniesiony do kosztorysu ofertowego!')"
+class="w-full h-14 bg-primary-container hover:bg-primary-fixed-dim text-on-primary-container font-headline font-bold text-base rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-all">
+<span class="material-symbols-outlined text-[22px]">price_change</span>
+<span>Przenieś Obmiar do Oferty & Kosztorysu</span>
+</button>
+</div>
+
+<!-- SUBVIEW PDF -->
+<div id="plan-mode-pdf" class="hidden flex-col gap-4">
+<div onclick="showToast('Wczytano: Lastenboek_Renovatie_Sint_Pieters_2025.pdf (48 stron)')"
+class="bg-surface-container p-5 rounded-xl border-2 border-dashed border-primary-container/50 hover:border-primary-container cursor-pointer text-center space-y-2 transition-colors">
+<div class="w-12 h-12 rounded-full bg-primary/15 text-primary mx-auto flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">upload_file</span>
+</div>
+<h3 class="font-headline font-bold text-base text-on-surface">Wgraj PDF / Lastenboek / DWG / XLSX</h3>
+<p class="text-xs text-on-surface-variant">AI Multi-Modal Parser v4.2 (CSTC TV 240 • DIN 18338 • NEN 6707)</p>
+</div>
+
+<div class="bg-surface-container-high p-4 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<div class="min-w-0">
+<span class="font-mono text-xs font-bold text-on-surface block truncate">Lastenboek_Renovatie_Sint_Pieters_2025.pdf</span>
+<span class="text-[11px] text-on-surface-variant">14.8 MB • 48 stron • Wektoryzacja 100%</span>
+</div>
+<span class="font-mono text-xs text-tertiary bg-tertiary/15 px-2 py-0.5 rounded font-bold">18 POSTEN</span>
+</div>
+<div class="space-y-1.5 font-mono text-xs">
+<div class="bg-surface-container-lowest p-2.5 rounded flex justify-between">
+<span class="text-on-surface">Art. 42.14 • Izolacja PIR 140mm (Rd 6.35)</span>
+<span class="text-tertiary font-bold">248.5 m²</span>
+</div>
+<div class="bg-surface-container-lowest p-2.5 rounded flex justify-between">
+<span class="text-on-surface">Art. 43.02 • Dachówka Stormpan 44 (Windzone 2)</span>
+<span class="text-primary font-bold">248.5 m²</span>
+</div>
+<div class="bg-surface-container-lowest p-2.5 rounded flex justify-between">
+<span class="text-on-surface">Art. 45.08 • Kosze zlewne Rheinzink 0.80mm</span>
+<span class="text-secondary font-bold">18.6 mb</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-outline-variant/30">
+<span class="text-xs text-on-surface-variant">Wartość kosztorysowa netto:</span>
+<span class="font-mono text-lg font-bold text-primary">€ 41.890,00</span>
+</div>
+<button onclick="switchTab('finance'); setFinanceSub('quote')" class="w-full h-12 bg-primary-container text-on-primary-container font-headline font-bold text-sm rounded-lg flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+Generuj Ofertę z Lastenboek (GAEB / Peppol)
+</button>
+</div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- TAB 3: AI FIELD INSPECTION (INSPEKCJA) -->
+<!-- ===================================================================== -->
+<section id="tab-inspect" class="tab-view flex-col gap-4">
+<div class="bg-surface-container-high rounded-xl p-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+<span class="font-headline text-xs text-secondary uppercase font-bold tracking-wider">Skaner Wizyjny AI v4.8</span>
+</div>
+<span class="font-mono text-xs text-on-surface-variant bg-surface-container-lowest px-2 py-0.5 rounded">29.4 FPS • Pente 38.5°</span>
+</div>
+
+<div class="relative w-full aspect-[16/10] rounded-xl bg-surface-container-lowest overflow-hidden border border-outline-variant/30 shadow-xl p-3 flex flex-col justify-between">
+<div class="relative z-10 flex justify-between items-center">
+<span class="bg-surface/90 backdrop-blur px-2 py-1 rounded font-mono text-[11px] text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">view_in_ar</span> RADAR 3D • KOMIN C-02
+</span>
+<span class="bg-surface/90 backdrop-blur px-2 py-1 rounded font-mono text-[11px] text-on-surface">AZIMUTH 142° SE</span>
+</div>
+
+<div class="relative z-10 grid grid-cols-2 gap-3 my-auto">
+<div class="border-2 border-error bg-error-container/25 rounded p-2 animate-pulse">
+<span class="bg-error text-on-error font-mono text-[10px] font-bold px-1.5 py-0.5 rounded block w-fit">KRYTYCZNY #01 • 96%</span>
+<span class="text-xs font-bold text-on-surface mt-1 block">Brak listwy i uszczelnienia Wakaflex</span>
+</div>
+<div class="border-2 border-primary-container bg-primary-container/20 rounded p-2">
+<span class="bg-primary-container text-on-primary-container font-mono text-[10px] font-bold px-1.5 py-0.5 rounded block w-fit">OSTRZEŻENIE #02</span>
+<span class="text-xs font-bold text-on-surface mt-1 block">Zakład membrany 8.2 cm (min. 15 cm)</span>
+</div>
+</div>
+
+<div class="relative z-10 flex justify-between items-center">
+<span class="bg-tertiary text-on-tertiary font-mono text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Rozstaw łat: 35.0 cm OK
+</span>
+<span class="bg-surface/90 px-2 py-0.5 rounded font-mono text-[10px] text-primary">CSTC NIT 240 / DIN 18338</span>
+</div>
+</div>
+
+<div class="bg-surface-container rounded-xl p-4 flex items-center justify-between shadow-md">
+<div>
+<span class="font-headline text-[11px] uppercase text-on-surface-variant tracking-wider">Wskaźnik Zgodności Technicznej</span>
+<h2 class="font-headline font-bold text-xl text-on-surface mt-0.5">ROOF QUALITY SCORE</h2>
+<p class="text-xs text-primary mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+Wymaga 2 korekt przed odbiorem końcowym
+</p>
+</div>
+<div class="relative w-20 h-20 flex items-center justify-center shrink-0">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" r="15.5" fill="none" stroke="#31353e" stroke-width="3.5" />
+<circle cx="18" cy="18" r="15.5" fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-dasharray="74, 100" stroke-linecap="round" />
+</svg>
+<div class="absolute text-center">
+<span class="font-mono text-xl font-bold text-on-surface block leading-none">74</span>
+<span class="font-mono text-[10px] text-on-surface-variant">/100</span>
+</div>
+</div>
+</div>
+
+<div class="bg-surface-container rounded-xl p-4 space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-headline font-bold text-base text-on-surface">Kalkulator Kosztów Napraw AI</span>
+<span class="font-mono text-xs text-secondary">Constructiv BE / Sekocenbud</span>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center">
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<span class="text-[10px] uppercase text-on-surface-variant block">Materiały</span>
+<span class="font-mono text-sm font-bold text-on-surface">350,00 €</span>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<span class="text-[10px] uppercase text-on-surface-variant block">Robocizna</span>
+<span class="font-mono text-sm font-bold text-on-surface">1.100,00 €</span>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<span class="text-[10px] uppercase text-on-surface-variant block">Czas / Ekipa</span>
+<span class="font-mono text-sm font-bold text-secondary">~3.5 h (2 os.)</span>
+</div>
+</div>
+<div class="bg-surface-container-high p-3 rounded-lg flex items-center justify-between">
+<span class="text-xs font-semibold text-on-surface">Łączny koszt usunięcia wad (netto):</span>
+<span class="font-mono text-xl font-bold text-primary">1.450,00 €</span>
+</div>
+</div>
+
+<div class="flex flex-col gap-2">
+<button onclick="showToast('Wygenerowano Protokół Usterek PDF (NIT 240) z pieczęcią czasu SHA-256')"
+class="w-full h-14 bg-primary text-on-primary font-headline font-bold text-base rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-[0.99]">
+<span class="material-symbols-outlined text-[22px]">picture_as_pdf</span>
+<span>Generuj Protokół Usterek PDF</span>
+</button>
+<button onclick="switchTab('finance'); setFinanceSub('correction'); showToast('Usterki zaimportowane jako pozycje do Korekty / Meerwerk!')"
+class="w-full h-12 bg-secondary-container text-on-secondary-container font-headline font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">difference</span>
+<span>Utwórz Aneks / Fakturę Korygującą z Usterek</span>
+</button>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- TAB 4: FINANCIALS (FINANSE) -->
+<!-- ===================================================================== -->
+<section id="tab-finance" class="tab-view flex-col gap-4">
+<div class="flex gap-1.5 overflow-x-auto pb-1">
+<button id="fsub-hub" onclick="setFinanceSub('hub')" class="px-3.5 py-2 rounded-full font-headline text-xs uppercase font-bold bg-primary-container text-on-primary-container shrink-0">
+Hub Peppol / KSeF
+</button>
+<button id="fsub-quote" onclick="setFinanceSub('quote')" class="px-3.5 py-2 rounded-full font-headline text-xs uppercase font-bold bg-surface-container text-on-surface-variant shrink-0">
+Oferta / Kosztorys
+</button>
+<button id="fsub-invoice" onclick="setFinanceSub('invoice')" class="px-3.5 py-2 rounded-full font-headline text-xs uppercase font-bold bg-surface-container text-on-surface-variant shrink-0">
+Nowa e-Faktura
+</button>
+<button id="fsub-correction" onclick="setFinanceSub('correction')" class="px-3.5 py-2 rounded-full font-headline text-xs uppercase font-bold bg-surface-container text-on-surface-variant shrink-0">
+Korekta / Meerwerk
+</button>
+<button id="fsub-abnahme" onclick="setFinanceSub('abnahme')" class="px-3.5 py-2 rounded-full font-headline text-xs uppercase font-bold bg-surface-container text-on-surface-variant shrink-0">
+Odbiór VOB/B § 12
+</button>
+</div>
+
+<!-- 4A: HUB -->
+<div id="fin-view-hub" class="flex flex-col gap-4">
+<div class="bg-surface-container rounded-xl p-4 shadow-md space-y-3">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline text-[11px] uppercase text-on-surface-variant">Zafakturowano w tym miesiącu</span>
+<div class="font-mono text-2xl font-bold text-primary mt-0.5">142.800,00 €</div>
+</div>
+<span class="px-2.5 py-1 rounded bg-tertiary/15 text-tertiary font-mono text-xs font-bold">+18.4% r/r</span>
+</div>
+<div class="grid grid-cols-2 gap-2 pt-1">
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<span class="text-[10px] uppercase text-on-surface-variant block">Identyfikator Peppol / BCE</span>
+<span class="font-mono text-xs text-primary font-bold">0208:0845920192</span>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<span class="text-[10px] uppercase text-on-surface-variant block">Bramka KSeF / AS4</span>
+<span class="font-mono text-xs text-tertiary font-bold">FA(3) • PKI 11.2026</span>
+</div>
+</div>
+</div>
+
+<div class="space-y-2.5">
+<div class="bg-surface-container p-4 rounded-xl space-y-2">
+<div class="flex justify-between items-start">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-mono font-bold text-sm text-on-surface">FAC/2025/03/014</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary/20 text-tertiary font-mono text-[10px] font-bold">PEPPOL UPO OK</span>
+</div>
+<span class="text-xs text-on-surface-variant block mt-0.5">Société Immobilière Wallonne • BE 0845.392.019</span>
+</div>
+<span class="font-mono font-bold text-sm text-tertiary">84.500,00 €</span>
+</div>
+</div>
+
+<div class="bg-surface-container p-4 rounded-xl space-y-2">
+<div class="flex justify-between items-start">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-mono font-bold text-sm text-on-surface">DEV/2025/079</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary font-mono text-[10px] font-bold">OFERTA AKTYWNA</span>
+</div>
+<span class="text-xs text-on-surface-variant block mt-0.5">Residentie Sint-Pieters • 385 m² Cynk na rąbek</span>
+</div>
+<span class="font-mono font-bold text-sm text-secondary">62.000,00 €</span>
+</div>
+<button onclick="setFinanceSub('invoice'); showToast('Przekonwertowano ofertę DEV/2025/079 na fakturę zaliczkową 30%!')"
+class="w-full h-10 bg-secondary text-on-secondary font-headline font-bold text-xs uppercase rounded-lg flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">receipt</span>
+Konwertuj na Fakturę Zaliczkową 30% (1 kliknięcie)
+</button>
+</div>
+</div>
+</div>
+
+<!-- 4B: QUOTE -->
+<div id="fin-view-quote" class="hidden flex-col gap-4">
+<div class="bg-surface-container p-4 rounded-xl space-y-3">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-headline text-[10px] uppercase text-primary font-bold">Kosztorys Ofertowy • VOB/B & CSTC</span>
+<h2 class="font-headline font-bold text-lg text-on-surface">OFF-2025/03/089-REV</h2>
+<span class="text-xs text-on-surface-variant">Residentie Sint-Pieters • Kerkstraat 45, Gent</span>
+</div>
+<span class="px-2 py-1 rounded bg-tertiary/15 text-tertiary font-mono text-xs font-bold">99.4% AI</span>
+</div>
+
+<div class="space-y-2 text-xs">
+<div class="bg-surface-container-low p-3 rounded-lg flex justify-between items-center">
+<div>
+<span class="font-bold text-on-surface block">01. Dachówka Stormpan 44 Antraciet (248.5 m²)</span>
+<span class="text-on-surface-variant">Łaty C24 + klamry burzowe RVS • BTW 6%</span>
+</div>
+<span class="font-mono font-bold text-primary">€ 19.507,25</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg flex justify-between items-center">
+<div>
+<span class="font-bold text-on-surface block">02. Izolacja PIR 140mm + Membrana W1 (248.5 m²)</span>
+<span class="text-tertiary">Rd 6.35 • Kwalifikuje się do premii termomodernizacyjnej</span>
+</div>
+<span class="font-mono font-bold text-tertiary">€ 13.419,00</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg flex justify-between items-center">
+<div>
+<span class="font-bold text-on-surface block">03. Kosze zlewne Rheinzink 0.80mm (18.6 mb)</span>
+<span class="text-on-surface-variant">Podłoże multiplex 18mm + dylatacje TV 244</span>
+</div>
+<span class="font-mono font-bold text-primary">€ 2.139,00</span>
+</div>
+</div>
+
+<div class="bg-surface-container-highest p-3 rounded-lg flex justify-between items-center">
+<div>
+<span class="text-[10px] uppercase text-on-surface-variant block">Suma Brutto (z VAT 6% / 21%)</span>
+<span class="font-mono text-xl font-bold text-on-surface">€ 44.797,90</span>
+</div>
+<div class="text-right">
+<span class="text-[10px] uppercase text-tertiary block">Transze VOB/B</span>
+<span class="font-mono text-xs text-on-surface font-bold">30% / 40% / 30%</span>
+</div>
+</div>
+
+<button onclick="dispatchDocument('Oferta GAEB / Peppol')" class="w-full h-13 py-3.5 bg-primary-container text-on-primary-container font-headline font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg">
+<span class="material-symbols-outlined text-[20px]">send</span>
+<span>Wyślij Ofertę & Aktywuj Link Podpisu Klienta</span>
+</button>
+</div>
+</div>
+
+<!-- 4C: E-INVOICE CREATOR -->
+<div id="fin-view-invoice" class="hidden flex-col gap-4">
+<div class="bg-surface-container p-4 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<h2 class="font-headline font-bold text-lg text-on-surface">Kreator e-Faktury</h2>
+<span id="inv-standard-badge" class="font-mono text-xs px-2 py-0.5 rounded bg-secondary/20 text-secondary font-bold">Peppol UBL BE</span>
+</div>
+
+<div>
+<span class="font-headline text-[10px] uppercase text-on-surface-variant tracking-wider block mb-1.5">Wybierz Reżim Podatkowy (Przelicza na żywo):</span>
+<div class="grid grid-cols-2 gap-1.5">
+<button onclick="selectTaxRegime('BE6')" id="tax-btn-BE6" class="tax-regime-btn p-2.5 rounded-lg bg-surface-container-high border border-primary-container text-left">
+<span class="font-headline font-bold text-xs text-primary block">🇧🇪 BE 6% (Renowacja >10l.)</span>
+<span class="text-[10px] text-on-surface-variant">Art. 1 bis AR 20 • Atest VAT</span>
+</button>
+<button onclick="selectTaxRegime('NL9')" id="tax-btn-NL9" class="tax-regime-btn p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/30 text-left">
+<span class="font-headline font-bold text-xs text-on-surface block">🇳🇱 NL 9% (Izolacja >2l.)</span>
+<span class="text-[10px] text-on-surface-variant">Belastingdienst Tabel 9%</span>
+</button>
+<button onclick="selectTaxRegime('PL8')" id="tax-btn-PL8" class="tax-regime-btn p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/30 text-left">
+<span class="font-headline font-bold text-xs text-on-surface block">🇵🇱 PL 8% / 23% + MPP</span>
+<span class="text-[10px] text-on-surface-variant">Art. 41 ust. 12 • Bud. mieszk.</span>
+</button>
+<button onclick="selectTaxRegime('DE0')" id="tax-btn-DE0" class="tax-regime-btn p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/30 text-left">
+<span class="font-headline font-bold text-xs text-on-surface block">🇩🇪 DE 0% PV / 19% MwSt</span>
+<span class="text-[10px] text-on-surface-variant">§ 12 Abs. 3 UStG • ZUGFeRD</span>
+</button>
+</div>
+</div>
+
+<div class="bg-surface-container-low p-3 rounded-lg space-y-2 font-mono text-xs">
+<div class="flex justify-between text-on-surface-variant">
+<span>Robocizna dekarska & izolacja (312 m²):</span>
+<span id="calc-labor-net" class="text-on-surface font-bold">27.186,00 €</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Materiały / Okna Velux / PV:</span>
+<span id="calc-mat-net" class="text-on-surface font-bold">2.760,00 €</span>
+</div>
+<div class="flex justify-between text-tertiary">
+<span id="calc-vat-label">Podatek VAT (6% robocizna + 21% mat.):</span>
+<span id="calc-vat-val" class="font-bold">+ 2.210,76 €</span>
+</div>
+<div class="flex justify-between text-on-surface-variant border-t border-outline-variant/30 pt-1.5">
+<span>Odliczenie zaliczki (30%):</span>
+<span id="calc-advance" class="text-tertiary">- 9.647,03 €</span>
+</div>
+<div class="bg-surface-container-highest p-2.5 rounded flex justify-between items-center mt-1">
+<span class="font-headline uppercase text-primary font-bold">Do zapłaty (Saldo):</span>
+<span id="calc-total-due" class="text-lg font-bold text-primary">22.509,73 €</span>
+</div>
+</div>
+
+<button onclick="dispatchDocument('e-Faktura UBL / FA(3)')"
+class="w-full h-14 bg-primary-container text-on-primary-container font-headline font-bold text-base rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-[0.99]">
+<span class="material-symbols-outlined text-[22px]">bolt</span>
+<span>Podpisz XAdES & Wyślij (Peppol / KSeF)</span>
+</button>
+</div>
+</div>
+
+<!-- 4D: CORRECTION / MEERWERK -->
+<div id="fin-view-correction" class="hidden flex-col gap-4">
+<div class="bg-surface-container p-4 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-headline text-[10px] uppercase text-primary font-bold">Faktura Korygująca / Debetnota Meerwerk</span>
+<h2 class="font-headline font-bold text-lg text-on-surface">KOR/2025/03/004 • Type 383</h2>
+</div>
+<span class="font-mono text-xs bg-surface-container-high text-secondary px-2 py-1 rounded">KOR FA(3)</span>
+</div>
+<p class="text-xs text-on-surface-variant bg-surface-container-low p-2.5 rounded-lg">
+<strong class="text-on-surface">Przyczyna:</strong> Roboty dodatkowe i zamienne wykryte podczas inspekcji AI — wymiana zbutwiałego deskowania (24 mb) oraz poszerzenie kosza tytan-cynk z 400 mm na 600 mm.
+</p>
+<div class="grid grid-cols-2 gap-2 font-mono text-xs bg-surface-container-low p-3 rounded-lg">
+<div>
+<span class="text-[10px] text-on-surface-variant block">Przed korektą:</span>
+<span class="text-on-surface-variant">39.545,28 zł</span>
+</div>
+<div class="text-right">
+<span class="text-[10px] text-primary block">Dopłata (Delta Brutto):</span>
+<span class="text-base font-bold text-primary">+ 4.994,04 zł</span>
+</div>
+</div>
+<button onclick="dispatchDocument('Faktura Korygująca KOR FA(3)')" class="w-full h-13 py-3.5 bg-primary-container text-on-primary-container font-headline font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span>Wyślij Korektę do KSeF 2.0 / Peppol</span>
+</button>
+</div>
+</div>
+
+<!-- 4E: VOB/B § 12 ABNAHME -->
+<div id="fin-view-abnahme" class="hidden flex-col gap-4">
+<div class="bg-surface-container p-4 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-headline text-[10px] uppercase text-secondary font-bold">VOB/B § 12 • eIDAS Art. 25</span>
+<h2 class="font-headline font-bold text-lg text-on-surface">Protokół Odbioru Budowlanego</h2>
+</div>
+<span class="font-mono text-xs bg-tertiary/15 text-tertiary px-2 py-0.5 rounded font-bold">ABN-2025/014</span>
+</div>
+
+<div class="bg-surface-container-low p-3 rounded-lg space-y-1.5 text-xs">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Status odbioru:</span>
+<span class="text-primary font-bold">Odbiór warunkowy (mit Vorbehalt)</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Kaucja gwarancyjna (usterka #01):</span>
+<span class="font-mono text-on-surface font-bold">500,00 € zatrzymane</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Dokumentacja powykonawcza:</span>
+<span class="text-tertiary font-bold">4 / 4 PDF Kompletne</span>
+</div>
+</div>
+
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container-lowest p-2.5 rounded-lg border border-outline-variant/30">
+<span class="text-[10px] uppercase text-on-surface-variant block">Podpis Inwestora</span>
+<svg class="w-full h-10 text-secondary my-1" viewBox="0 0 200 50" fill="none" stroke="currentColor" stroke-width="2.5">
+<path d="M 15 35 Q 45 10, 75 30 T 140 20 T 185 32" />
+</svg>
+<span class="font-mono text-[9px] text-tertiary">Zweryfikowano eIDAS</span>
+</div>
+<div class="bg-surface-container-lowest p-2.5 rounded-lg border border-outline-variant/30">
+<span class="text-[10px] uppercase text-on-surface-variant block">Kierownik Budowy</span>
+<svg class="w-full h-10 text-primary my-1" viewBox="0 0 200 50" fill="none" stroke="currentColor" stroke-width="2.5">
+<path d="M 10 25 L 45 40 L 80 12 L 120 42 L 175 18" />
+</svg>
+<span class="font-mono text-[9px] text-tertiary">Karta Mistrzowska HWK</span>
+</div>
+</div>
+
+<button onclick="dispatchDocument('Protokół Odbioru XAdES')" class="w-full h-13 py-3.5 bg-primary-container text-on-primary-container font-headline font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+<span>Zapieczętuj XAdES & Powiąż z Fakturą Końcową</span>
+</button>
+</div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- TAB 5: WAREHOUSE (MAGAZYN / STOCK) -->
+<!-- ===================================================================== -->
+<section id="tab-stock" class="tab-view flex-col gap-4">
+<div class="bg-surface-container-low p-4 rounded-xl shadow-md space-y-3">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline text-[11px] uppercase text-primary font-bold">Logistyka Budów</span>
+<h2 class="font-headline font-bold text-xl text-on-surface">Magazyn & Hurtownie B2B</h2>
+<p class="text-xs text-on-surface-variant">Hub Flémalle / Limburg • SIG • Defrancq • Deschacht</p>
+</div>
+<button onclick="showToast('Skaner QR / EAN aktywny')" class="w-11 h-11 rounded-xl bg-surface-container-high text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">qr_code_scanner</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-surface-container p-2.5 rounded-lg">
+<span class="text-[10px] uppercase text-on-surface-variant block">Wartość Stanu Netto</span>
+<span class="font-mono text-lg font-bold text-primary">148.920 €</span>
+</div>
+<div class="bg-surface-container p-2.5 rounded-lg">
+<span class="text-[10px] uppercase text-on-surface-variant block">Rezerwacje Budowy</span>
+<span class="font-mono text-lg font-bold text-secondary">66% (280 m²)</span>
+</div>
+</div>
+</div>
+
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input id="stock-search" oninput="filterStock(this.value)" type="search" placeholder="Szukaj dachówki, łupka, PIR, cynku, membrany..."
+class="w-full h-12 pl-11 pr-4 bg-surface-container-low text-on-surface rounded-xl text-sm border border-outline-variant/30 focus:outline-none focus:border-primary" />
+</div>
+
+<div id="stock-list" class="flex flex-col gap-3">
+<article class="stock-card bg-surface-container-low p-4 rounded-xl space-y-2.5">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-mono text-[10px] px-2 py-0.5 rounded bg-tertiary/15 text-tertiary font-bold">NA STANIE • #KOR-10-7016</span>
+<h3 class="font-bold text-base text-on-surface mt-1">Dachówka Ceramiczna Koramic Actua 10</h3>
+<span class="text-xs text-on-surface-variant">Antracyt 7016 • Zakup: 28,50 €/m² → Klient (+30%): 37,05 €/m²</span>
+</div>
+<div class="text-right shrink-0">
+<span class="font-mono text-xl font-bold text-primary block leading-none">420</span>
+<span class="font-mono text-[11px] text-on-surface-variant">m² wolne</span>
+</div>
+</div>
+</article>
+
+<article class="stock-card bg-surface-container-low p-4 rounded-xl space-y-2.5 border border-error/30">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-mono text-[10px] px-2 py-0.5 rounded bg-error/20 text-error font-bold">DEFICYT BUDOWA WAVRE</span>
+<h3 class="font-bold text-base text-on-surface mt-1">Membrana Delta-Vent S Plus (75 m²/rolka)</h3>
+<span class="text-xs text-error block mt-0.5">Brakuje 2 rolek (150 m²) przed montażem we wtorek!</span>
+</div>
+<div class="text-right shrink-0">
+<span class="font-mono text-xl font-bold text-error block leading-none">8</span>
+<span class="font-mono text-[11px] text-on-surface-variant">rolek</span>
+</div>
+</div>
+</article>
+
+<article class="stock-card bg-surface-container-low p-4 rounded-xl space-y-2.5">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-mono text-[10px] px-2 py-0.5 rounded bg-secondary/15 text-secondary font-bold">W TRANSPORCIE • HDS 07:30</span>
+<h3 class="font-bold text-base text-on-surface mt-1">Łupek Naturalny Cupa 12 (40x22 cm)</h3>
+<span class="text-xs text-on-surface-variant">Defrancq Liège • Kierowca: Marc D. (#BL-902)</span>
+</div>
+<div class="text-right shrink-0">
+<span class="font-mono text-xl font-bold text-secondary block leading-none">1.850</span>
+<span class="font-mono text-[11px] text-on-surface-variant">sztuk</span>
+</div>
+</div>
+</article>
+</div>
+
+<button onclick="dispatchDocument('Zamówienie B2B Peppol (Defrancq / SIG)')"
+class="w-full h-14 bg-primary text-on-primary font-headline font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-[0.99]">
+<span class="material-symbols-outlined text-[22px]">shopping_cart_checkout</span>
+<span>ZAMÓW BRAKUJĄCE MATERIAŁY B2B (PEPPOL e-ORDERING)</span>
+</button>
+</section>
+
+</main>
+
+<!-- BOTTOM NAVIGATION BAR -->
+<nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/95 backdrop-blur-xl border-t border-outline-variant/25 shadow-[0_-2px_14px_rgba(0,0,0,0.55)]">
+<div class="max-w-2xl mx-auto h-20 px-1 flex items-center justify-around">
+<button onclick="switchTab('dashboard')" data-nav="dashboard" class="nav-btn flex flex-col items-center justify-center min-w-[60px] min-h-[52px] text-primary-container scale-105 transition-all">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+<span data-nav-label="dashboard" class="font-headline font-bold text-[10px] uppercase tracking-wide mt-1">Pulpit</span>
+</button>
+<button onclick="switchTab('plans')" data-nav="plans" class="nav-btn flex flex-col items-center justify-center min-w-[60px] min-h-[52px] text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[24px]">architecture</span>
+<span data-nav-label="plans" class="font-headline font-bold text-[10px] uppercase tracking-wide mt-1">Plany AI</span>
+</button>
+<button onclick="switchTab('inspect')" data-nav="inspect" class="nav-btn flex flex-col items-center justify-center min-w-[60px] min-h-[52px] text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[24px]">document_scanner</span>
+<span data-nav-label="inspect" class="font-headline font-bold text-[10px] uppercase tracking-wide mt-1">Inspekcja</span>
+</button>
+<button onclick="switchTab('finance')" data-nav="finance" class="nav-btn flex flex-col items-center justify-center min-w-[60px] min-h-[52px] text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+<span data-nav-label="finance" class="font-headline font-bold text-[10px] uppercase tracking-wide mt-1">Finanse</span>
+</button>
+<button onclick="switchTab('stock')" data-nav="stock" class="nav-btn flex flex-col items-center justify-center min-w-[60px] min-h-[52px] text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[24px]">inventory_2</span>
+<span data-nav-label="stock" class="font-headline font-bold text-[10px] uppercase tracking-wide mt-1">Magazyn</span>
+</button>
+</div>
+</nav>
+
+<!-- GLOBAL FEEDBACK TOAST -->
+<div id="global-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-surface-bright border border-tertiary/40 text-on-surface shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 max-w-[92vw]">
+<span class="material-symbols-outlined text-tertiary text-[18px] shrink-0">verified_user</span>
+<span id="global-toast-text" class="font-mono text-xs truncate">Gotowe</span>
+</div>
+
+<!-- APPLICATION LOGIC -->
+<script>
+var appState = {
+region: 'PL',
+activeTab: 'dashboard',
+zoomed: false,
+taxRegime: 'BE6'
+};
+
+var I18N = {
+PL: {
+brand: 'DachPro',
+subtitle: 'Pulpit Dekarski & KSeF',
+fiscalLine: 'KSeF 2.0 FA(3) & Peppol BIS 3.0: Zsynchronizowany',
+nav: { dashboard: 'Pulpit', plans: 'Plany AI', inspect: 'Inspekcja', finance: 'Finanse', stock: 'Magazyn' },
+tax: 'PL8'
+},
+BE: {
+brand: 'ToiturePro',
+subtitle: 'Chantiers BE & Peppol',
+fiscalLine: 'Peppol Hub Belgique (AS4 / BOSA / Hermes) • Actif',
+nav: { dashboard: 'Bord', plans: 'Plans IA', inspect: 'Inspect', finance: 'Finances', stock: 'Stock' },
+tax: 'BE6'
+},
+NL: {
+brand: 'DachPro',
+subtitle: 'Dakdekkers App NL',
+fiscalLine: 'Simplerinvoicing / Peppol NL UBL BIS 3.0 • Live',
+nav: { dashboard: 'Overzicht', plans: 'AI Plannen', inspect: 'Inspectie', finance: 'Financiën', stock: 'Magazijn' },
+tax: 'NL9'
+},
+DE: {
+brand: 'DachPro',
+subtitle: 'Dachdecker & VOB/B',
+fiscalLine: 'ZUGFeRD 2.2 / XRechnung 3.0.1 • BUND Online',
+nav: { dashboard: 'Übersicht', plans: 'Aufmaß AI', inspect: 'Mängel KI', finance: 'Finanzen', stock: 'Lager' },
+tax: 'DE0'
+}
+};
+
+function switchTab(tabId) {
+appState.activeTab = tabId;
+var views = document.querySelectorAll('.tab-view');
+for (var i = 0; i < views.length; i++) {
+views[i].classList.remove('active');
+}
+var target = document.getElementById('tab-' + tabId);
+if (target) {
+target.classList.add('active');
+}
+
+var btns = document.querySelectorAll('.nav-btn');
+for (var j = 0; j < btns.length; j++) {
+var btn = btns[j];
+var isCurrent = btn.getAttribute('data-nav') === tabId;
+if (isCurrent) {
+btn.classList.add('text-primary-container', 'scale-105');
+btn.classList.remove('text-on-surface-variant');
+} else {
+btn.classList.remove('text-primary-container', 'scale-105');
+btn.classList.add('text-on-surface-variant');
+}
+}
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setRegion(reg) {
+appState.region = reg;
+var cfg = I18N[reg] || I18N.PL;
+document.getElementById('brand-name').textContent = cfg.brand;
+document.getElementById('header-subtitle').textContent = cfg.subtitle;
+document.getElementById('dash-fiscal-line').textContent = cfg.fiscalLine;
+var keys = ['dashboard', 'plans', 'inspect', 'finance', 'stock'];
+for (var i = 0; i < keys.length; i++) {
+var k = keys[i];
+var el = document.querySelector("[data-nav-label='" + k + "']");
+if (el) el.textContent = cfg.nav[k];
+}
+selectTaxRegime(cfg.tax);
+showToast('Przełączono region i przepisy fiskalne: ' + reg);
+}
+
+function setPlanMode(mode) {
+var cad = document.getElementById('plan-mode-cad');
+var pdf = document.getElementById('plan-mode-pdf');
+var bCad = document.getElementById('btn-plan-cad');
+var bPdf = document.getElementById('btn-plan-pdf');
+if (mode === 'cad') {
+cad.classList.remove('hidden'); cad.classList.add('flex');
+pdf.classList.add('hidden'); pdf.classList.remove('flex');
+bCad.className = 'py-2.5 px-3 rounded-lg font-headline text-xs uppercase font-bold bg-primary-container text-on-primary-container shadow';
+bPdf.className = 'py-2.5 px-3 rounded-lg font-headline text-xs uppercase font-bold text-on-surface-variant hover:text-on-surface';
+} else {
+pdf.classList.remove('hidden'); pdf.classList.add('flex');
+cad.classList.add('hidden'); cad.classList.remove('flex');
+bPdf.className = 'py-2.5 px-3 rounded-lg font-headline text-xs uppercase font-bold bg-primary-container text-on-primary-container shadow';
+bCad.className = 'py-2.5 px-3 rounded-lg font-headline text-xs uppercase font-bold text-on-surface-variant hover:text-on-surface';
+}
+}
+
+function togglePlanZoom() {
+appState.zoomed = !appState.zoomed;
+var svg = document.getElementById('roof-svg');
+var lbl = document.getElementById('zoom-label');
+svg.style.transform = appState.zoomed ? 'scale(1.35)' : 'scale(1)';
+lbl.textContent = appState.zoomed ? '135%' : '100%';
+}
+
+function setFinanceSub(sub) {
+var list = ['hub', 'quote', 'invoice', 'correction', 'abnahme'];
+for (var i = 0; i < list.length; i++) {
+var id = list[i];
+var view = document.getElementById('fin-view-' + id);
+var btn = document.getElementById('fsub-' + id);
+if (view && btn) {
+if (id === sub) {
+view.classList.remove('hidden'); view.classList.add('flex');
+btn.className = 'px-3.5 py-2 rounded-full font-headline text-xs uppercase font-bold bg-primary-container text-on-primary-container shrink-0';
+} else {
+view.classList.add('hidden'); view.classList.remove('flex');
+btn.className = 'px-3.5 py-2 rounded-full font-headline text-xs uppercase font-bold bg-surface-container text-on-surface-variant shrink-0';
+}
+}
+}
+}
+
+function selectTaxRegime(code) {
+appState.taxRegime = code;
+var allBtns = document.querySelectorAll('.tax-regime-btn');
+for (var i = 0; i < allBtns.length; i++) {
+allBtns[i].classList.remove('bg-surface-container-high', 'border-primary-container');
+allBtns[i].classList.add('bg-surface-container-low', 'border-outline-variant/30');
+}
+var activeBtn = document.getElementById('tax-btn-' + code);
+if (activeBtn) {
+activeBtn.classList.remove('bg-surface-container-low', 'border-outline-variant/30');
+activeBtn.classList.add('bg-surface-container-high', 'border-primary-container');
+}
+
+var taxMap = {
+BE6: { std: 'Peppol UBL BE', labor: '27.186,00 €', mat: '2.760,00 €', lbl: 'TVA 6% (rob.) + 21% (mat.):', vat: '+ 2.210,76 €', adv: '- 9.647,03 €', due: '22.509,73 €' },
+NL9: { std: 'Peppol UBL NL', labor: '27.186,00 €', mat: '2.760,00 €', lbl: 'BTW 9% (arbeid) + 21% (mat.):', vat: '+ 3.026,34 €', adv: '- 9.891,70 €', due: '23.080,64 €' },
+PL8: { std: 'KSeF FA(3) + MPP', labor: '27 186,00 zł', mat: '8 280,00 zł', lbl: 'VAT 8% (montaż) + 23% (mat.):', vat: '+ 4 079,28 zł', adv: '- 11 863,58 zł', due: '27 681,70 zł' },
+DE0: { std: 'ZUGFeRD / XRech.', labor: '25.815,00 €', mat: '18.450,00 €', lbl: '19% MwSt (Dach) + 0% (PV §12):', vat: '+ 4.904,85 €', adv: '- 32.000,00 €', due: '17.169,85 €' }
+};
+
+var data = taxMap[code];
+if (data) {
+document.getElementById('inv-standard-badge').textContent = data.std;
+document.getElementById('calc-labor-net').textContent = data.labor;
+document.getElementById('calc-mat-net').textContent = data.mat;
+document.getElementById('calc-vat-label').textContent = data.lbl;
+document.getElementById('calc-vat-val').textContent = data.vat;
+document.getElementById('calc-advance').textContent = data.adv;
+document.getElementById('calc-total-due').textContent = data.due;
+}
+}
+
+function filterStock(query) {
+var q = query.toLowerCase().trim();
+var cards = document.querySelectorAll('.stock-card');
+for (var i = 0; i < cards.length; i++) {
+var card = cards[i];
+var txt = card.textContent.toLowerCase();
+card.style.display = (!q || txt.indexOf(q) !== -1) ? 'block' : 'none';
+}
+}
+
+var toastTimer = null;
+function showToast(msg) {
+var toast = document.getElementById('global-toast');
+var text = document.getElementById('global-toast-text');
+if (!toast || !text) return;
+text.textContent = msg;
+toast.classList.remove('opacity-0', 'pointer-events-none');
+toast.classList.add('opacity-100');
+if (toastTimer) clearTimeout(toastTimer);
+toastTimer = setTimeout(function() {
+toast.classList.remove('opacity-100');
+toast.classList.add('opacity-0', 'pointer-events-none');
+}, 2600);
+}
+
+function dispatchDocument(docName) {
+showToast('Podpisywanie XAdES i wysyłka: ' + docName + '...');
+setTimeout(function() {
+showToast('✓ Potwierdzenie UPO / SHA-256 odebrane dla: ' + docName);
+}, 1200);
+}
+</script>
+</body>
+</html>
